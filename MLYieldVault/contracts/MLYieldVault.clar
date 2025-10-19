@@ -318,6 +318,41 @@
     )
 )
 
+;; Advanced ML feature: Dynamic risk-adjusted portfolio optimization
+;; This function implements a sophisticated allocation algorithm that combines
+;; multiple ML concepts: risk scoring, confidence weighting, and momentum-based adjustments
+(define-public (optimize-portfolio-allocation)
+    (let
+        (
+            (tvl (var-get total-value-locked))
+            (num-strategies (var-get strategy-count))
+        )
+        (asserts! (is-eq tx-sender CONTRACT-OWNER) ERR-NOT-AUTHORIZED)
+        (asserts! (> tvl u0) ERR-INVALID-AMOUNT)
+        
+        ;; Calculate optimal allocation using ML-weighted risk-adjusted returns
+        (let
+            (
+                ;; Get all active strategies and calculate their scores
+                (strategy-scores (calculate-all-strategy-scores num-strategies))
+                (total-score (fold + strategy-scores u0))
+            )
+            
+            ;; Allocate funds proportionally to ML-adjusted scores
+            (if (> total-score u0)
+                (begin
+                    ;; Apply allocations to each strategy
+                    (fold apply-strategy-allocation 
+                        strategy-scores
+                        {index: u0, total-score: total-score, tvl: tvl})
+                    (ok true)
+                )
+                (ok false)
+            )
+        )
+    )
+)
+
 ;; Helper for portfolio optimization: Calculate scores for all strategies
 (define-private (calculate-all-strategy-scores (count uint))
     (map calculate-strategy-score-by-index (list u0 u1 u2 u3 u4 u5 u6 u7 u8 u9))
